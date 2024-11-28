@@ -25,7 +25,6 @@ export interface PaymentMethod {
     bankAccountNumber?: string;
 }
 
-
 export interface CardDetails {
     cardNumber: string;  
     expiryDate: string; 
