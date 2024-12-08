@@ -57,6 +57,26 @@
             <div class="card-body">
                 <h5 class="card-title mb-4">Alle transacties</h5>
 
+                <!-- Zoekveld -->
+                <form action="/transactions/<%= user.id %>" method="GET" style="display:flex; justify-content: flex-end; align-items: center;">
+                    <input type="number" name="search" id="searchAmount" class="form-control" style="display:inline-block; width: 150px; margin: 1rem; font-size: 0.9rem;" placeholder="Zoek op bedrag" value="<%= search || '' %>">
+                    <button type="submit" class="btn btn-primary" style="margin: 0 1rem; font-size: 0.9rem; padding: 0.4rem 0.6rem;">Filteren</button>
+            
+
+                    <!-- Filter Form -->
+                    <select name="type" id="transactionType" class="form-control"
+                        style="display:inline-block; width: 150px; margin: 1rem; font-size: 0.9rem;">
+                        <option value="">Alle</option>
+                        <option value="incoming" <%=type==='incoming' ? 'selected' : '' %>>Inkomsten</option>
+                        <option value="outgoing" <%=type==='outgoing' ? 'selected' : '' %>>Uitgaven</option>
+                    </select>
+
+                    <button type="submit" class="btn btn-primary"
+                        style="margin: 0 1rem; font-size: 0.9rem; padding: 0.4rem 0.6rem;">Filteren</button>
+                </form>
+
+
+                <!-- Transactions Table -->
                 <table class="table table-striped">
                     <thead>
                         <tr>
@@ -69,7 +89,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <% user.expenses.forEach(transaction=> { %>
+                        <% expenses.forEach(transaction=> { %>
                             <tr>
                                 <td>
                                     <%= transaction.description %>

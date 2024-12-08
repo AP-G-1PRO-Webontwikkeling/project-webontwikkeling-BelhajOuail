@@ -1,6 +1,7 @@
 import express from "express";
 import transactionsRouter from "./routes/transactionsRouter";
 import users from "./data/data.json";
+import { connect } from "./mongoDB"
 
 const app = express();
 const PORT = 3000;
@@ -20,5 +21,6 @@ app.get('/', (req, res) => {
 });
 
 app.listen(PORT, () => {
+  connect();
   console.log(`Server draait op http://localhost:${PORT}`);
 });
