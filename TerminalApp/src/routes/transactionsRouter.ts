@@ -33,6 +33,24 @@ export default function transactionsRouter(users: any[]) {
     });
   });
 
+  router.post("/:userId/add", (req, res) => {
+    const { description, amount, category, isIncoming } = req.body;
+    const newTransaction = {
+      id: Date.now().toString(),
+      description,
+      amount: parseFloat(amount),
+      date: new Date().toISOString(),
+      currency: "EUR",
+      paymentMethod: { method: "Onbekend" },
+      isIncoming: isIncoming === "true",
+      category,
+      tags: [],
+      isPaid: false,
+    };
+    user.expenses.push(newTransaction);
+    res.redirect(`/transactions/${user.id}`);
+  });
+
   // Verwijderen van transacties
   router.post("/:userId/delete/:transactionId", (req, res) => {
     const userId = req.params.userId;
