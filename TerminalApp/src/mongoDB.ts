@@ -41,10 +41,97 @@ async function insertData() {
         if (existingData.length === 0) {
             const result = await collection.insertOne(data[0]);
             console.log(`Data successfulled added in database...`);
-        } else {
-            console.log("Data already exists in the 'expenses' collection.");
         }
     } catch (error) {
         console.error("Error inserting data:", error);
     }
 }
+
+
+export async function getUser(userId: string) {
+    const user = await collectionUsers.findOne({ id: userId });
+    return user;
+}
+
+
+export async function getUserAndTransactions(userId: string) {
+    const user = await collectionUsers.findOne({ id: userId });
+
+    if (!user) {
+        throw new Error(`User with id ${userId} not found`);
+    }
+
+    const transactions = user.expenses;
+
+    return { user, transactions };
+}
+
+export async function filterTransactions(transactions: any[], type?: string, search?: string) {
+    let filteredTransactions = transactions;
+
+    if (type) {
+        filteredTransactions = filteredTransactions.filter((transaction) =>
+            type === 'incoming' ? transaction.isIncoming : !transaction.isIncoming
+        );
+    }
+
+    if (search && !isNaN(Number(search))) {
+        const searchAmount = Number(search);
+        filteredTransactions = filteredTransactions.filter((transaction) =>
+            transaction.amount === searchAmount
+        );
+    }
+    return filteredTransactions;
+}
+
+export async function addTransactionToUser(userId: string, newTransaction: any) {
+    const user = await collectionUsers.findOne({ id: userId });
+
+    if (user) {
+        const newTransactionId = (user.expenses.length + 1).toString();
+
+        newTransaction.id = newTransactionId;
+
+        await collectionUsers.updateOne(
+            { id: userId },
+            { $push: { expenses: newTransaction } }
+        );
+    }
+}
+
+export async function removeTransactionFromUser(userId: string, transactionId: string) {
+    const user = await collectionUsers.findOne({ id: userId });
+
+    if (user) {
+        await collectionUsers.updateOne(
+            { id: userId },
+            { $pull: { expenses: { id: transactionId } } }
+        );
+    }
+}
+
+export async function updateTransactionForUser(userId: string, transactionId: string, updatedTransaction: any) {
+    const user = await collectionUsers.findOne({ id: userId });
+
+    if (user) {
+        const transactionIndex = user.expenses.findIndex((t) => t.id === transactionId);
+
+        if (transactionIndex !== -1) {
+            user.expenses[transactionIndex] = { ...user.expenses[transactionIndex], ...updatedTransaction };
+
+            await collectionUsers.updateOne(
+                { id: userId },
+                { $set: { expenses: user.expenses } }
+            );
+        }
+    }
+}
+
+
+
+
+
+
+
+
+

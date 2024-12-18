@@ -1,65 +1,84 @@
 import { Router } from "express";
+import { addTransactionToUser, filterTransactions, getUser, getUserAndTransactions, removeTransactionFromUser, updateTransactionForUser } from "../mongoDB";
 
 const router = Router();
 
-export default function transactionsRouter(users: any[]) {
-  const user = users[0];
+router.get("/", async (req, res) => {
+  const userId = "BelhajOuail" // dit is nog hardcoded momenteel
+  const user = await getUser(userId);
+  if (user) {
+    res.render("index", { user });
+  }
+});
 
-  router.get("/:userId", (req, res) => {
-    const { type, search } = req.query; // Haalt bedrag en het type op
+router.get("/:userId", async (req, res) => {
+  const { userId } = req.params;
+  const { search, type } = req.query as { search?: string; type?: string };
 
-    let filteredTransactions = user.expenses;
+  const { user, transactions } = await getUserAndTransactions(userId)
 
-    // Filteren op type (incoming, outgoing of alle)
-    if (type) {
-      filteredTransactions = filteredTransactions.filter((transaction: any) =>
-        type === 'incoming' ? transaction.isIncoming : !transaction.isIncoming
-      );
-    }
+  let filteredTransactions = await filterTransactions(transactions, type, search);
 
-    // Zoeken op bedrag (als zoekterm bestaat, controleer of het een getal is)
-    if (search && !isNaN(Number(search))) {
-      const searchAmount = Number(search);
-      filteredTransactions = filteredTransactions.filter((transaction: any) =>
-        transaction.amount === searchAmount // Zoek op bedrag
-      );
-    }
-
-    res.render("transactions", {
-      user,
-      expenses: filteredTransactions,
-      type,
-      search,
-    });
+  res.render("transactions", {
+    user,
+    expenses: filteredTransactions,
+    type,
+    search,
   });
+});
 
-  router.post("/:userId/add", (req, res) => {
-    const { description, amount, category, isIncoming } = req.body;
-    const newTransaction = {
-      id: Date.now().toString(),
+router.post("/:userId/add", async (req, res) => {
+  const { userId } = req.params;
+  const { description, amount, category, isIncoming } = req.body;
+
+
+  const newTransaction = {
+    id: parseFloat(amount),
+    description,
+    amount: parseFloat(amount),
+    date: new Date().toISOString(),
+    currency: "EUR",
+    paymentMethod: { method: "Onbekend" },
+    isIncoming: isIncoming === "true",
+    category,
+    tags: [],
+    isPaid: false,
+  };
+
+
+  addTransactionToUser(userId, newTransaction);
+  res.redirect(`/transactions/${userId}`);
+
+});
+
+// Verwijderen van transacties
+router.post("/:userId/delete/:transactionId", async (req, res) => {
+  const { userId, transactionId } = req.params;
+  removeTransactionFromUser(userId, transactionId);
+
+  res.redirect(`/transactions/${userId}`);
+
+});
+
+
+router.post("/:userId/edit/:transactionId", async (req, res) => {
+  const { userId, transactionId } = req.params;
+  const { description, amount, category, isIncoming } = req.body;
+
+  const updatedTransaction = {
       description,
       amount: parseFloat(amount),
-      date: new Date().toISOString(),
-      currency: "EUR",
-      paymentMethod: { method: "Onbekend" },
-      isIncoming: isIncoming === "true",
       category,
-      tags: [],
-      isPaid: false,
-    };
-    user.expenses.push(newTransaction);
-    res.redirect(`/transactions/${user.id}`);
-  });
+      isIncoming: isIncoming === "true",  // Zorg ervoor dat het correct wordt omgezet
+  };
 
-  // Verwijderen van transacties
-  router.post("/:userId/delete/:transactionId", (req, res) => {
-    const userId = req.params.userId;
-    const transactionId = req.params.transactionId;
+  
+       updateTransactionForUser(userId, transactionId, updatedTransaction);
+      res.redirect(`/transactions/${userId}`);  // Terug naar de transactiepagina
 
-    user.expenses = user.expenses.filter((expense: any) => expense.id !== transactionId);
+});
 
-    res.redirect(`/transactions/${userId}`);
-  });
 
-  return router;
-}
+
+export default router;
+

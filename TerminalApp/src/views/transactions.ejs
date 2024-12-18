@@ -7,6 +7,8 @@
     <title>Transacties - <%= user.name %>
     </title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+
 
     <style>
         body {
@@ -23,9 +25,10 @@
         }
 
         .btn {
-            margin-top: 5rem;
             padding: 0.5rem;
         }
+
+
 
         .table th,
         .table td {
@@ -34,7 +37,7 @@
 
         .delete-btn {
             color: red;
-            font-size: 20px;
+            font-size: 25px;
             cursor: pointer;
             border: none;
             background: none;
@@ -42,6 +45,10 @@
 
         .delete-btn:hover {
             color: darkred;
+        }
+
+        .editbtn {
+            margin-top: 0;
         }
     </style>
 </head>
@@ -58,10 +65,13 @@
                 <h5 class="card-title mb-4">Alle transacties</h5>
 
                 <!-- Zoekveld -->
-                <form action="/transactions/<%= user.id %>" method="GET" style="display:flex; justify-content: flex-end; align-items: center;">
-                    <input type="number" name="search" id="searchAmount" class="form-control" style="display:inline-block; width: 150px; margin: 1rem; font-size: 0.9rem;" placeholder="Zoek op bedrag" value="<%= search || '' %>">
-                    <button type="submit" class="btn btn-primary" style="margin: 0 1rem; font-size: 0.9rem; padding: 0.4rem 0.6rem;">Filteren</button>
-            
+                <form action="/transactions/<%= user.id %>" method="GET"
+                    style="display:flex; justify-content: flex-end; align-items: center;">
+                    <input type="number" name="search" id="searchAmount" class="form-control"
+                        style="display:inline-block; width: 150px; margin: 1rem; font-size: 0.9rem;"
+                        placeholder="Zoek op bedrag" value="<%= search || '' %>">
+
+
 
                     <!-- Filter Form -->
                     <select name="type" id="transactionType" class="form-control"
@@ -107,11 +117,85 @@
                                     <%= new Date(transaction.date).toLocaleDateString() %>
                                 </td>
                                 <td>
-                                    <form action="/transactions/<%= user.id %>/delete/<%= transaction.id %>"
-                                        method="POST" style="display:inline;">
-                                        <button type="submit" class="delete-btn">&times;</button>
-                                    </form>
+                                    <!-- Dropdown menu om bewerken te selecteren -->
+                                    <div class="dropdown">
+                                        <button class="btn btn-info btn-sm dropdown-toggle" type="button"
+                                            id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true"
+                                            aria-expanded="false">
+                                            Acties
+                                        </button>
+                                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                            <a class="dropdown-item" href="#editTransactionForm<%= transaction.id %>"
+                                                data-toggle="collapse">Bewerken</a>
+                                            <form action="/transactions/<%= user.id %>/delete/<%= transaction.id %>"
+                                                method="POST">
+                                                <button class="dropdown-item" type="submit">Verwijderen</button>
+                                            </form>
+                                        </div>
+                                    </div>
+
+                                    <!-- Bewerken formulier (verbergen/tonen met collapse) -->
+                                    <div id="editTransactionForm<%= transaction.id %>" class="collapse">
+                                        <form action="/transactions/<%= user.id %>/edit/<%= transaction.id %>"
+                                            method="POST">
+                                            <div class="table-responsive">
+                                                <table class="table table-bordered">
+                                                    <tbody>
+                                                        <!-- Omschrijving veld -->
+                                                        <tr>
+                                                            <td><label for="description">Omschrijving</label></td>
+                                                            <td><input type="text" name="description"
+                                                                    class="form-control"
+                                                                    value="<%= transaction.description %>" required>
+                                                            </td>
+                                                        </tr>
+
+                                                        <!-- Bedrag veld -->
+                                                        <tr>
+                                                            <td><label for="amount">Bedrag (€)</label></td>
+                                                            <td><input type="number" name="amount" class="form-control"
+                                                                    value="<%= transaction.amount %>" required></td>
+                                                        </tr>
+
+                                                        <!-- Categorie veld -->
+                                                        <tr>
+                                                            <td><label for="category">Categorie</label></td>
+                                                            <td><input type="text" name="category" class="form-control"
+                                                                    value="<%= transaction.category %>" required></td>
+                                                        </tr>
+
+                                                        <!-- Type veld (Inkomst of Uitgave) -->
+                                                        <tr>
+                                                            <td><label for="isIncoming">Type</label></td>
+                                                            <td>
+                                                                <select name="isIncoming" class="form-control">
+                                                                    <option value="true" <%=transaction.isIncoming
+                                                                        ? 'selected' : '' %>>Inkomst</option>
+                                                                    <option value="false" <%=!transaction.isIncoming
+                                                                        ? 'selected' : '' %>>Uitgave</option>
+                                                                </select>
+                                                            </td>
+                                                        </tr>
+
+                                                        <!-- Submitting button -->
+                                                        <tr>
+                                                            <td colspan="2" class="text-center">
+                                                                <button type="submit"
+                                                                    class="btn btn-success btn-block">Bewerken</button>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </form>
+                                    </div>
+
+
+
                                 </td>
+
+
+
                             </tr>
                             <% }) %>
                     </tbody>
