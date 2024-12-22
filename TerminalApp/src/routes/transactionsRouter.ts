@@ -4,7 +4,7 @@ import { addTransactionToUser, filterTransactions, getUser, getUserAndTransactio
 
 const router = Router();
 
-router.get("/index", async (req, res) => {
+router.get("/", async (req, res) => {
   if (!req.session.user) {
     return res.redirect('/login');
   }
@@ -18,6 +18,22 @@ router.get("/index", async (req, res) => {
     res.redirect('/login');
   }
 });
+
+router.get('/index', async (req, res) => {
+  if (!req.session.user) {
+    return res.redirect('/login');
+  }
+
+  const userId = req.session.user.id;
+  const user = await getUser(userId);
+
+  if (user) {
+    res.render("index", { user });
+  } else {
+    res.redirect('/login');
+  }
+});
+
 
 router.get("/logout", async (req, res) => {
   req.session.destroy(() => {
