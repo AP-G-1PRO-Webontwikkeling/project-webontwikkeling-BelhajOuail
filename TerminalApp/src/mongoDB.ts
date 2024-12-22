@@ -2,11 +2,13 @@ import { MongoClient, Collection } from "mongodb";
 import dotenv from "dotenv";
 import data from './data/data.json';
 import { User } from "./models/interfaces";
+import bcrypt from "bcrypt";
 
 dotenv.config();
 
 export const uri = process.env.URI || "mongodb+srv://s115225:azerty123@terminalapp.5njae.mongodb.net/?retryWrites=true&w=majority&appName=TerminalApp";
 export const client = new MongoClient(uri);
+const saltRounds : number = 10;
 
 const collectionUsers: Collection<User> = client.db("budgetApp").collection<User>("expenses");
 
@@ -126,6 +128,51 @@ export async function updateTransactionForUser(userId: string, transactionId: st
         }
     }
 }
+
+export async function registerUser(user: User) {
+    const existingUser = await collectionUsers.findOne({ id: user.id });
+
+    if (existingUser) {
+        throw new Error(' Gebruikersnaam is al in gebruik.');
+    }
+
+    const hashedPassword = await bcrypt.hash(user.password, saltRounds);
+
+    const newUser: User = {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        expenses: user.expenses || [],
+        password: hashedPassword,
+        budget: user.budget || {
+            monthlyLimit: 0,
+            notificationThreshold: 0,
+            isActive: false
+        },
+    };
+    await collectionUsers.insertOne(newUser);
+}
+
+export async function loginUser(username: string, password: string) {
+    if (username === "" || password === "") {
+        throw new Error("Gebruikersnaam en wachtwoord zijn verplicht.");
+    }
+
+    let user = await collectionUsers.findOne({ id: username });
+    if (user) {
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+
+        if (isPasswordValid) {
+            return user;
+        } else {
+            return null;
+        }        
+    } else {
+        return null;
+    }
+}
+
+
 
 
 

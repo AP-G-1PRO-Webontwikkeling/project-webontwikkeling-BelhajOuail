@@ -3,8 +3,10 @@ export interface User {
     name: string;
     email: string;
     expenses: Expense[];
-    budget: Budget;
-}
+    password: string;  
+    budget?: Budget;   
+  }
+  
 
 export interface Expense {
     id: string;

@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Finance Tracker</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="icon" href="data:image/x-icon;,">
     <style>
         body {
             background-color: #f0f0f0;
@@ -63,10 +64,11 @@
 
                     <a href="/transactions/<%= user.id %>" class="btn btn-secondary w-50 mx-auto d-block mt-4">Bekijk
                         Transacties</a>
-
-
                 </form>
             </div>
+            <form action="/logout" method="get">
+                <button type="submit">Log uit</button>
+            </form>
         </div>
     </div>
 
