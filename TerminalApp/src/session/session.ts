@@ -19,8 +19,12 @@ declare module 'express-session' {
 }
 
 export default session({
-    secret: 'your-secret-key',
+    secret: process.env.SESSION_SECRET || 'your-secret-key',
     resave: false,
     saveUninitialized: true,
-    cookie: { secure: false }
+    store: mongoStore, 
+    cookie: { 
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 1000 * 60 * 60 * 24,
+    }
 });
