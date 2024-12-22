@@ -89,17 +89,19 @@ export async function filterTransactions(transactions: any[], type?: string, sea
 export async function addTransactionToUser(userId: string, newTransaction: any) {
     const user = await collectionUsers.findOne({ id: userId });
 
-    if (user) {
-        const newTransactionId = (user.expenses.length + 1).toString();
-
-        newTransaction.id = newTransactionId;
-
-        await collectionUsers.updateOne(
-            { id: userId },
-            { $push: { expenses: newTransaction } }
-        );
+    if (!user) {
+        throw new Error('Gebruiker niet gevonden.');
     }
+
+    const newTransactionId = (user.expenses.length + 1).toString();
+    newTransaction.id = newTransactionId;
+
+    await collectionUsers.updateOne(
+        { id: userId },
+        { $push: { expenses: newTransaction } }
+    );
 }
+
 
 export async function removeTransactionFromUser(userId: string, transactionId: string) {
     const user = await collectionUsers.findOne({ id: userId });
@@ -129,14 +131,20 @@ export async function updateTransactionForUser(userId: string, transactionId: st
     }
 }
 
-export async function registerUser(user: User) {
+export async function registerUser(user: User, budgetInput?: { monthlyLimit: number; notificationThreshold: number; isActive: boolean }) {
     const existingUser = await collectionUsers.findOne({ id: user.id });
 
     if (existingUser) {
-        throw new Error(' Gebruikersnaam is al in gebruik.');
+        throw new Error('Gebruikersnaam is al in gebruik.');
     }
 
-    const hashedPassword = await bcrypt.hash(user.password, saltRounds);
+    const hashedPassword = await bcrypt.hash(user.password, 10);
+
+    const budget = budgetInput || {
+        monthlyLimit: 0,
+        notificationThreshold: 0,
+        isActive: false
+    };
 
     const newUser: User = {
         id: user.id,
@@ -144,12 +152,13 @@ export async function registerUser(user: User) {
         email: user.email,
         expenses: user.expenses || [],
         password: hashedPassword,
-        budget: user.budget || {
-            monthlyLimit: 0,
-            notificationThreshold: 0,
-            isActive: false
+        budget: {
+            monthlyLimit: budget.monthlyLimit,
+            notificationThreshold: budget.notificationThreshold,
+            isActive: budget.isActive
         },
     };
+
     await collectionUsers.insertOne(newUser);
 }
 
@@ -171,7 +180,6 @@ export async function loginUser(username: string, password: string) {
         return null;
     }
 }
-
 
 
 

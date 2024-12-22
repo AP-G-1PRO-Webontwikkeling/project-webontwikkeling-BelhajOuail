@@ -46,8 +46,10 @@ router.get('/register', (req, res) => {
   res.render('register');
 });
 
+
 router.post('/register', async (req, res) => {
-  const { username, email, password, confirm_password, fullname } = req.body;
+  const { username, email, password, confirm_password, fullname, monthlyLimit, notificationThreshold, isActive } = req.body;
+
 
   if (password !== confirm_password) {
     return res.render('register', { message: 'Wachtwoorden komen niet overeen.' });
@@ -60,9 +62,9 @@ router.post('/register', async (req, res) => {
     expenses: [],
     password: password,
     budget: {
-      monthlyLimit: 0,
-      notificationThreshold: 0,
-      isActive: false
+      monthlyLimit: parseFloat(monthlyLimit) || 0, // Zet om naar een nummer, standaard 0
+      notificationThreshold: parseFloat(notificationThreshold) || 0, // Zet om naar een nummer, standaard 0
+      isActive: isActive === 'on'
     },
   };
 

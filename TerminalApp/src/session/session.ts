@@ -20,7 +20,8 @@ declare module 'express-session' {
 
 export default session({
     secret: 'your-secret-key',
-    resave: false,
+    store: mongoStore,
+    resave: true,
     saveUninitialized: true,
-    cookie: { secure: false }
+    cookie: { maxAge: 1000 * 60 * 60 * 24 * 7 } // 1 week
 });

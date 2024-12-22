@@ -9,6 +9,7 @@
     <link rel="icon" href="data:image/x-icon;,">
     <style>
         body {
+            display: flex;
             background-color: #f0f0f0;
         }
 
@@ -26,7 +27,7 @@
             padding: 0.5rem;
         }
 
-        .error-message{
+        .error-message {
             font-weight: bolder;
             color: red;
         }
@@ -35,7 +36,7 @@
 
 <body class="text-center">
 
-    <div class="container d-flex align-items-center justify-content-center" style="height: 100vh;">
+    <div class="container d-flex align-items-center justify-content-center">
         <div class="card shadow-sm w-100" style="max-width: 450px;">
             <div class="card-header bg-primary text-white">
                 <h3 class="card-title">Registreren</h3>
@@ -67,10 +68,28 @@
                         <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
                     </div>
 
+                    <hr>
+                    <h5 class="mb-3">Budgetinstellingen</h5>
+
+                    <div class="form-group">
+                        <label for="monthlyLimit">Maandelijks Budget (in euro)</label>
+                        <input type="number" class="form-control" id="monthlyLimit" name="monthlyLimit" placeholder="Bijv. 2000" min="0">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="notificationThreshold">Notificatiedrempel (in %)</label>
+                        <input type="number" class="form-control" id="notificationThreshold" name="notificationThreshold" placeholder="Bijv. 80" min="0" max="100">
+                    </div>
+
+                    <div class="form-group form-check">
+                        <input type="checkbox" class="form-check-input" id="isActive" name="isActive">
+                        <label class="form-check-label" for="isActive">Wil je notificaties ontvangen als je budget dreigt overschreden te worden?</label>
+                    </div>
+
                     <% if (typeof message !== 'undefined') { %>
                         <p class="error-message"><%= message %></p>
                     <% } %>
-                    
+
                     <button type="submit" class="btn btn-primary w-50 mx-auto d-block">Registreren</button>
 
                     <a href="/login" class="btn btn-secondary w-50 mx-auto d-block mt-4">Ga terug naar Login</a>
