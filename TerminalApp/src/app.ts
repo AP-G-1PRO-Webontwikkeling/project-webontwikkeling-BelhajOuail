@@ -5,7 +5,8 @@ import session from "./session/session";
 import path from 'path';
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT;
+console.log(PORT)
 
 app.set("view engine", "ejs");
 
