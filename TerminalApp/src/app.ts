@@ -17,7 +17,15 @@ app.use(session)
 app.use("/", router);
 app.use("/transactions", router);
 
+app.use("/", (req, res) => {
+  if (!req.session.user) {
+    return res.redirect('/login'); 
+  }
+  res.redirect('/index'); 
+});
+
+
 app.listen(PORT, () => {
   connect();
-  console.log(`Server draait op http://localhost:${PORT}/index`);
+  console.log(`Server draait op http://localhost:${PORT}`);
 });
